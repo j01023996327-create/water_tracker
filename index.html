@@ -310,22 +310,33 @@
         }
         
         function loadData() {
-            const saved = localStorage.getItem('waterIntake');
-            const savedDate = localStorage.getItem('waterDate');
-            const today = new Date().toDateString();
-            
-            if (savedDate === today && saved) {
-                currentWater = parseInt(saved);
-            } else {
+            try {
+                const saved = localStorage.getItem('waterIntake');
+                const savedDate = localStorage.getItem('waterDate');
+                const today = new Date().toDateString();
+                
+                if (savedDate === today && saved) {
+                    currentWater = parseInt(saved);
+                } else {
+                    currentWater = 0;
+                    localStorage.setItem('waterDate', today);
+                }
+            } catch (e) {
+                // localStorage 접근 불가 시 메모리만 사용
                 currentWater = 0;
-                localStorage.setItem('waterDate', today);
+                console.log('localStorage not available, using memory only');
             }
             
             updateDisplay();
         }
         
         function saveData() {
-            localStorage.setItem('waterIntake', currentWater);
+            try {
+                localStorage.setItem('waterIntake', currentWater);
+            } catch (e) {
+                // localStorage 접근 불가 시 무시
+                console.log('localStorage not available');
+            }
         }
         
         function addWater(amount) {
@@ -375,14 +386,24 @@
         function resetWater() {
             currentWater = 0;
             goalAchieved = false;
-            localStorage.setItem('waterIntake', '0');
-            localStorage.setItem('waterDate', new Date().toDateString());
+            
+            try {
+                localStorage.setItem('waterIntake', '0');
+                localStorage.setItem('waterDate', new Date().toDateString());
+            } catch (e) {
+                console.log('localStorage not available');
+            }
+            
             updateDisplay();
             document.getElementById('successMessage').classList.remove('show');
             
             // 초기화 피드백
             const btn = event.target;
             const originalText = btn.textContent;
+            const originalBg = btn.style.background;
+            const originalColor = btn.style.color;
+            const originalBorder = btn.style.borderColor;
+            
             btn.textContent = '✓ 초기화 완료';
             btn.style.background = '#d3e5ef';
             btn.style.color = '#0b6e99';
@@ -390,9 +411,9 @@
             
             setTimeout(() => {
                 btn.textContent = originalText;
-                btn.style.background = '';
-                btn.style.color = '';
-                btn.style.borderColor = '';
+                btn.style.background = originalBg;
+                btn.style.color = originalColor;
+                btn.style.borderColor = originalBorder;
             }, 2000);
         }
         
