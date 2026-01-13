@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물 섭취량 트래커</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f7f6f3;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 3px;
+            padding: 48px 40px;
+            box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+            max-width: 420px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #37352f;
+            margin-bottom: 4px;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        
+        .date {
+            color: rgba(55, 53, 47, 0.65);
+            font-size: 14px;
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+        
+        .cup-container {
+            position: relative;
+            width: 180px;
+            height: 260px;
+            margin: 0 auto 32px;
+        }
+        
+        .cup {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #37352f;
+            border-top: none;
+            border-radius: 0 0 30px 30px;
+            overflow: hidden;
+            background: #fafaf9;
+        }
+        
+        .water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: #2383e2;
+            transition: height 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .water-text {
+            color: white;
+            font-weight: 600;
+            font-size: 20px;
+        }
+        
+        .cup-top {
+            position: absolute;
+            top: -12px;
+            left: -8px;
+            right: -8px;
+            height: 16px;
+            border: 3px solid #37352f;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            background: white;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            gap: 12px;
+        }
+        
+        .stat {
+            flex: 1;
+            text-align: center;
+            padding: 16px 12px;
+            background: #f7f6f3;
+            border-radius: 3px;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #37352f;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: rgba(55, 53, 47, 0.65);
+            font-weight: 400;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(55, 53, 47, 0.16);
+            border-radius: 3px;
+            font-size: 14px;
+            color: #37352f;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        input:hover {
+            background: rgba(55, 53, 47, 0.03);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #2383e2;
+            background: white;
+            box-shadow: rgba(35, 131, 226, 0.35) 0px 0px 0px 1px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background: #37352f;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        button:hover {
+            background: #2f2d29;
+        }
+        
+        button:active {
+            background: #37352f;
+            transform: scale(0.98);
+        }
+        
+        .quick-add {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .quick-btn {
+            flex: 1;
+            padding: 10px 8px;
+            background: white;
+            color: #37352f;
+            border: 1px solid rgba(55, 53, 47, 0.16);
+            border-radius: 3px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+        }
+        
+        .quick-btn:hover {
+            background: rgba(55, 53, 47, 0.06);
+        }
+        
+        .quick-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .reset-btn {
+            background: white;
+            color: #eb5757;
+            border: 1px solid rgba(235, 87, 87, 0.3);
+            margin-top: 8px;
+            width: 100%;
+        }
+        
+        .reset-btn:hover {
+            background: rgba(235, 87, 87, 0.08);
+            border-color: rgba(235, 87, 87, 0.5);
+        }
+        
+        .success-message {
+            display: none;
+            background: #d3e5ef;
+            color: #0b6e99;
+            padding: 16px;
+            border-radius: 3px;
+            margin-top: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid rgba(11, 110, 153, 0.15);
+            animation: slideIn 0.3s ease;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            font-weight: 600;
+            color: #37352f;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💧 물 섭취량 트래커</h1>
+        <div class="date" id="date"></div>
+        
+        <div class="cup-container">
+            <div class="cup-top"></div>
+            <div class="cup">
+                <div class="percentage" id="percentage">0%</div>
+                <div class="water" id="water">
+                    <span class="water-text" id="waterText"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="current">0</div>
+                <div class="stat-label">현재 (ml)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">2000</div>
+                <div class="stat-label">목표 (ml)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="remaining">2000</div>
+                <div class="stat-label">남은 양 (ml)</div>
+            </div>
+        </div>
+        
+        <div class="quick-add">
+            <button class="quick-btn" onclick="addWater(200)">컵 1잔<br>(200ml)</button>
+            <button class="quick-btn" onclick="addWater(250)">머그잔<br>(250ml)</button>
+            <button class="quick-btn" onclick="addWater(500)">물병<br>(500ml)</button>
+        </div>
+        
+        <div class="controls">
+            <input type="number" id="waterInput" placeholder="ml 입력" min="0" step="50">
+            <button onclick="addCustomWater()">추가</button>
+        </div>
+        
+        <button class="reset-btn" onclick="resetWater()">초기화</button>
+        
+        <div class="success-message" id="successMessage">
+            🎉 축하합니다! 오늘의 목표를 달성했습니다!
+        </div>
+    </div>
+    
+    <script>
+        const GOAL = 2000;
+        let currentWater = 0;
+        let goalAchieved = false;
+        
+        function updateDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('date').textContent = now.toLocaleDateString('ko-KR', options);
+        }
+        
+        function loadData() {
+            const saved = localStorage.getItem('waterIntake');
+            const savedDate = localStorage.getItem('waterDate');
+            const today = new Date().toDateString();
+            
+            if (savedDate === today && saved) {
+                currentWater = parseInt(saved);
+            } else {
+                currentWater = 0;
+                localStorage.setItem('waterDate', today);
+            }
+            
+            updateDisplay();
+        }
+        
+        function saveData() {
+            localStorage.setItem('waterIntake', currentWater);
+        }
+        
+        function addWater(amount) {
+            currentWater = Math.min(currentWater + amount, GOAL + 1000);
+            updateDisplay();
+            saveData();
+            checkGoal();
+        }
+        
+        function addCustomWater() {
+            const input = document.getElementById('waterInput');
+            const amount = parseInt(input.value);
+            
+            if (amount && amount > 0) {
+                addWater(amount);
+                input.value = '';
+            }
+        }
+        
+        function updateDisplay() {
+            const percentage = Math.min((currentWater / GOAL) * 100, 100);
+            const waterHeight = (percentage / 100) * 260;
+            
+            document.getElementById('water').style.height = waterHeight + 'px';
+            document.getElementById('current').textContent = currentWater.toLocaleString();
+            document.getElementById('remaining').textContent = Math.max(0, GOAL - currentWater).toLocaleString();
+            document.getElementById('percentage').textContent = Math.round(percentage) + '%';
+            
+            if (percentage >= 100) {
+                document.getElementById('percentage').style.color = 'white';
+            } else {
+                document.getElementById('percentage').style.color = '#37352f';
+            }
+        }
+        
+        function checkGoal() {
+            if (currentWater >= GOAL && !goalAchieved) {
+                goalAchieved = true;
+                document.getElementById('successMessage').classList.add('show');
+                
+                setTimeout(() => {
+                    document.getElementById('successMessage').classList.remove('show');
+                }, 5000);
+            }
+        }
+        
+        function resetWater() {
+            if (confirm('물 섭취량을 초기화하시겠습니까?')) {
+                currentWater = 0;
+                goalAchieved = false;
+                updateDisplay();
+                saveData();
+                document.getElementById('successMessage').classList.remove('show');
+            }
+        }
+        
+        document.getElementById('waterInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addCustomWater();
+            }
+        });
+        
+        updateDate();
+        loadData();
+    </script>
+</body>
+</html>
