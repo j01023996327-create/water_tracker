@@ -373,13 +373,27 @@
         }
         
         function resetWater() {
-            if (confirm('물 섭취량을 초기화하시겠습니까?')) {
-                currentWater = 0;
-                goalAchieved = false;
-                updateDisplay();
-                saveData();
-                document.getElementById('successMessage').classList.remove('show');
-            }
+            currentWater = 0;
+            goalAchieved = false;
+            localStorage.setItem('waterIntake', '0');
+            localStorage.setItem('waterDate', new Date().toDateString());
+            updateDisplay();
+            document.getElementById('successMessage').classList.remove('show');
+            
+            // 초기화 피드백
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ 초기화 완료';
+            btn.style.background = '#d3e5ef';
+            btn.style.color = '#0b6e99';
+            btn.style.borderColor = 'rgba(11, 110, 153, 0.3)';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.style.borderColor = '';
+            }, 2000);
         }
         
         document.getElementById('waterInput').addEventListener('keypress', function(e) {
